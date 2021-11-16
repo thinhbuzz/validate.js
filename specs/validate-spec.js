@@ -92,6 +92,16 @@ describe("validate", function() {
     };
     expect(validate({foo: null}, constraints)).toBeDefined();
   });
+  it("works with nested objects set to null", function () {
+    var constraints = {
+      email: {
+        email: {message: {vi: '^%{value} không phải là một địa chỉ email hợp lệ.'}},
+      }
+    };
+    validate.options = {locale: 'vi'};
+
+    expect(validate({email: 'validatejs'}, constraints)).toEqual({email: ["validatejs không phải là một địa chỉ email hợp lệ."]});
+  });
 
   describe("runValidations", function() {
     it("throws an error when the validator is not found", function() {
@@ -552,6 +562,47 @@ describe("validate", function() {
       validate.version.metadata = "foobar";
 
       expect("" + validate.version).toEqual(version);
+    });
+  });
+
+  describe("locale", function () {
+    var locales = validate.locales;
+
+    afterEach(function () {
+      validate.locales = locales;
+    });
+
+    it("only english", function () {
+      expect(Object.keys(validate.locales)).toEqual(['en']);
+      expect(validate.locales.en).toBeDefined();
+    });
+
+    it("set multiples locales", function () {
+      validate.setLocale({
+        vi: {email: {message: '^%{value} không phải là một địa chỉ email hợp lệ.'}},
+        es: {email: {message: '^%{value} no es una dirección de correo electrónico válida.'}},
+      });
+      var c = {
+        foo: {
+          email: true
+        }
+      };
+      validate.options = {locale: 'vi'};
+      expect(validate({foo: "bar"}, c)).toEqual({foo: ['bar không phải là một địa chỉ email hợp lệ.']});
+      validate.options = {locale: 'es'};
+      expect(validate({foo: "bar"}, c)).toEqual({foo: ['bar no es una dirección de correo electrónico válida.']});
+    });
+
+    it("set locale", function () {
+      validate.setLocale('vi', {email: {message: '^%{value} không phải là một địa chỉ email hợp lệ.'}});
+      var c = {
+        foo: {
+          email: true
+        }
+      };
+      validate.options = {locale: 'vi'};
+      expect(validate({foo: "bar"}, c)).toEqual({foo: ['bar không phải là một địa chỉ email hợp lệ.']});
+      expect(validate({duration: "foobar"}, {duration: {numericality: true}})).toEqual({"duration": ["Duration is not a number"]});
     });
   });
 });
