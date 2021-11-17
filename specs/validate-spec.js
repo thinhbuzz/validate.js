@@ -92,7 +92,7 @@ describe("validate", function() {
     };
     expect(validate({foo: null}, constraints)).toBeDefined();
   });
-  it("works with nested objects set to null", function () {
+  it("works with inline message locale", function () {
     var constraints = {
       email: {
         email: {message: {vi: '^%{value} không phải là một địa chỉ email hợp lệ.'}},
